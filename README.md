@@ -5,7 +5,7 @@ A Flask web application for generating and managing canteen coupons. Customers e
 ## Features
 
 - Generate a coupon for a customer by name; each coupon also gets an internal number such as `C00001`
-- Customer names are shown everywhere instead of coupon numbers
+- The customer name and coupon number are shown together everywhere (name large, number as a tag)
 - Printable coupon page showing how many people are ahead in the queue
 - Home page with "Now Serving", queue statistics and the latest coupon
 - Staff queue manager: serve, undo (move back to queue), delete, and search coupons

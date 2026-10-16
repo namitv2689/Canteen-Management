@@ -22,7 +22,7 @@
   <section class="card">
     <div class="section-head">
       <h2>Pending</h2>
-      <input type="search" class="search" placeholder="Search name…" data-filter="pending-table" aria-label="Search pending coupons">
+      <input type="search" class="search" placeholder="Search name or number…" data-filter="pending-table" aria-label="Search pending coupons by name or number">
     </div>
     {% if pending %}
     <div class="table-wrap">
@@ -32,13 +32,13 @@
           {% for c in pending %}
           <tr class="{{ 'row-next' if loop.first }}">
             <td>{{ loop.index }}</td>
-            <td><strong>{{ c.display_name }}</strong>{% if loop.first %} <span class="badge badge-pending">Next</span>{% endif %}</td>
+            <td class="name-cell"><strong>{{ c.display_name }}</strong> {% if c.customer_name %}<span class="coupon-tag">{{ c.number }}</span>{% endif %}{% if loop.first %} <span class="badge badge-pending">Next</span>{% endif %}</td>
             <td class="muted">{{ c.created_at|localtime('%I:%M %p') }}</td>
             <td class="right">
               <form method="post" class="inline">
                 <input type="hidden" name="coupon_id" value="{{ c.id }}">
                 <button name="action" value="serve" class="btn btn-sm btn-success">Serve</button>
-                <button name="action" value="delete" class="btn btn-sm btn-danger" data-confirm="Delete the coupon for {{ c.display_name }}?">Delete</button>
+                <button name="action" value="delete" class="btn btn-sm btn-danger" data-confirm="Delete the coupon for {{ c.label }}?">Delete</button>
               </form>
             </td>
           </tr>
@@ -60,13 +60,13 @@
         <tbody>
           {% for c in served %}
           <tr>
-            <td><strong>{{ c.display_name }}</strong></td>
+            <td class="name-cell"><strong>{{ c.display_name }}</strong> {% if c.customer_name %}<span class="coupon-tag">{{ c.number }}</span>{% endif %}</td>
             <td class="muted">{{ c.created_at|localtime('%I:%M %p') }}</td>
             <td class="right">
               <form method="post" class="inline">
                 <input type="hidden" name="coupon_id" value="{{ c.id }}">
                 <button name="action" value="requeue" class="btn btn-sm btn-ghost">Undo</button>
-                <button name="action" value="delete" class="btn btn-sm btn-danger" data-confirm="Delete the coupon for {{ c.display_name }}?">Delete</button>
+                <button name="action" value="delete" class="btn btn-sm btn-danger" data-confirm="Delete the coupon for {{ c.label }}?">Delete</button>
               </form>
             </td>
           </tr>

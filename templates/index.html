@@ -14,6 +14,7 @@
   <div class="hero-card card">
     <p class="card-label">Now Serving</p>
     <p class="big-number name-text">{{ now_serving.display_name if now_serving else '—' }}</p>
+    {% if now_serving and now_serving.customer_name %}<p class="coupon-tag coupon-tag-lg">{{ now_serving.number }}</p>{% endif %}
     <p class="muted">{% if now_serving %}Please collect your order at the counter.{% else %}The queue is empty right now.{% endif %}</p>
   </div>
 </section>
@@ -29,7 +30,7 @@
   {% if last %}
     <div class="latest-row">
       <div>
-        <p class="coupon-number name-text">{{ last.display_name }}</p>
+        <p class="coupon-number name-text">{{ last.display_name }}{% if last.customer_name %} <span class="coupon-tag">{{ last.number }}</span>{% endif %}</p>
         <p class="muted">Issued {{ last.created_at|localtime }}</p>
       </div>
       <span class="badge badge-{{ last.status }}">{{ last.status|capitalize }}</span>

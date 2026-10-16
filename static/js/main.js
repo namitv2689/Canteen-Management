@@ -40,6 +40,7 @@
   var board = document.querySelector('[data-board]');
   if (board) {
     var nowEl = board.querySelector('[data-now]');
+    var nowNumEl = board.querySelector('[data-now-number]');
     var nextEl = board.querySelector('[data-next]');
     var servedEl = board.querySelector('[data-served]');
     var updatedEl = board.querySelector('[data-updated]');
@@ -57,6 +58,12 @@
       items.forEach(function (c) {
         var li = document.createElement('li');
         li.textContent = c.display_name;
+        if (c.customer_name) {
+          var tag = document.createElement('span');
+          tag.className = 'chip-number';
+          tag.textContent = c.number;
+          li.appendChild(tag);
+        }
         el.appendChild(li);
       });
     };
@@ -65,9 +72,12 @@
       fetch(board.getAttribute('data-api'), { cache: 'no-store' })
         .then(function (r) { return r.json(); })
         .then(function (data) {
-          var num = data.now_serving ? data.now_serving.display_name : '—';
+          var now = data.now_serving;
+          var num = now ? now.label : '—';
           if (num !== current) {
-            nowEl.textContent = num;
+            nowEl.textContent = now ? now.display_name : '—';
+            nowNumEl.textContent = now && now.customer_name ? now.number : '';
+            nowNumEl.hidden = !(now && now.customer_name);
             nowEl.classList.remove('flash-in');
             void nowEl.offsetWidth;
             nowEl.classList.add('flash-in');

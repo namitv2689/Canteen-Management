@@ -28,12 +28,20 @@ class Coupon(db.Model):
         # Coupons created before names were collected fall back to their number.
         return self.customer_name or self.number
 
+    @property
+    def label(self):
+        """Name and number together, e.g. 'Arjun (C00002)'."""
+        if self.customer_name:
+            return f'{self.customer_name} ({self.number})'
+        return self.number
+
     def to_dict(self):
         return {
             'id': self.id,
             'number': self.number,
             'customer_name': self.customer_name,
             'display_name': self.display_name,
+            'label': self.label,
             'status': self.status,
             'created_at': self.created_at.isoformat() if self.created_at else None,
         }
@@ -131,13 +139,13 @@ def create_app(test_config=None):
             elif action == 'serve' and coupon.status == 'pending':
                 coupon.status = 'served'
                 db.session.commit()
-                flash(f'{coupon.display_name} marked as served.', 'success')
+                flash(f'{coupon.label} marked as served.', 'success')
             elif action == 'requeue' and coupon.status == 'served':
                 coupon.status = 'pending'
                 db.session.commit()
-                flash(f'{coupon.display_name} moved back to the queue.', 'info')
+                flash(f'{coupon.label} moved back to the queue.', 'info')
             elif action == 'delete':
-                name = coupon.display_name
+                name = coupon.label
                 db.session.delete(coupon)
                 db.session.commit()
                 flash(f'Coupon for {name} deleted.', 'info')

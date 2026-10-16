@@ -139,7 +139,7 @@ h2 { font-size: 1.15rem; font-weight: 700; }
 /* Manage */
 .page-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
 .page-head p { margin: 0; }
-.grid-2 { display: grid; grid-template-columns: 1.3fr 1fr; gap: 1.5rem; align-items: start; }
+.grid-2 { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 1.5rem; align-items: start; }
 .section-head { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
 .section-head h2 { margin: 0; }
 .search { padding: .5rem .75rem; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); font: inherit; min-width: 0; width: 180px; }
@@ -167,7 +167,7 @@ form.inline { display: inline-flex; gap: .4rem; margin: 0; }
 
 /* Responsive */
 @media (max-width: 860px) {
-  .hero, .grid-2, .board { grid-template-columns: 1fr; }
+  .hero, .grid-2, .board { grid-template-columns: minmax(0, 1fr); }
   .step-list { grid-template-columns: 1fr; }
 }
 @media (max-width: 640px) {
@@ -205,3 +205,19 @@ form.inline { display: inline-flex; gap: .4rem; margin: 0; }
 @media (max-width: 640px) {
   .name-form .input, .name-form-inline .input, .name-form .btn { width: 100%; max-width: none; flex: 1 1 100%; }
 }
+
+/* Coupon number shown next to customer names */
+.coupon-tag {
+  display: inline-block; padding: .1rem .5rem; border-radius: 6px;
+  background: var(--bg); border: 1px solid var(--border); color: var(--muted);
+  font-size: .8rem; font-weight: 600; letter-spacing: .02em;
+  font-variant-numeric: tabular-nums; vertical-align: middle; white-space: nowrap;
+}
+p.coupon-tag { margin: .25rem auto .5rem; }
+.coupon-tag-lg { font-size: 1rem; padding: .2rem .7rem; }
+.coupon-tag-xl { font-size: clamp(1.1rem, 3vw, 1.75rem); padding: .3rem 1rem; color: var(--text); }
+.coupon-tag-xl[hidden] { display: none; }
+.coupon-number .coupon-tag { font-size: .9rem; font-weight: 600; }
+.chip-number { margin-left: .5rem; font-size: .8rem; font-weight: 600; opacity: .75; font-variant-numeric: tabular-nums; }
+td.name-cell { white-space: normal; min-width: 9rem; }
+td.name-cell .coupon-tag { margin: .1rem 0; }

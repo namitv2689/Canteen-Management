@@ -29,6 +29,7 @@ def test_create_coupon_stores_customer_name(client):
                        follow_redirects=True)
     assert resp.status_code == 200
     assert b'Ravi Kumar' in resp.data
+    assert b'C00001' in resp.data
     coupon = Coupon.query.one()
     assert coupon.number == 'C00001'
     assert coupon.customer_name == 'Ravi Kumar'
@@ -46,7 +47,9 @@ def test_create_coupon_requires_name(client):
 def test_name_falls_back_to_number(client):
     db.session.add(Coupon(number='C00009'))
     db.session.commit()
-    assert Coupon.query.one().display_name == 'C00009'
+    coupon = Coupon.query.one()
+    assert coupon.display_name == 'C00009'
+    assert coupon.label == 'C00009'
 
 
 def test_existing_database_gets_name_column(tmp_path):
@@ -71,7 +74,7 @@ def test_serve_requeue_and_delete(client):
 
     resp = client.post('/manage', data={'action': 'serve', 'coupon_id': first.id},
                        follow_redirects=True)
-    assert b'Asha marked as served' in resp.data
+    assert b'Asha (C00001) marked as served' in resp.data
     assert db.session.get(Coupon, first.id).status == 'served'
 
     client.post('/manage', data={'action': 'requeue', 'coupon_id': first.id})
@@ -93,6 +96,7 @@ def test_api_queue(client):
     data = client.get('/api/queue').get_json()
     assert data['now_serving']['display_name'] == 'Asha'
     assert data['now_serving']['number'] == 'C00001'
+    assert data['now_serving']['label'] == 'Asha (C00001)'
     assert [c['display_name'] for c in data['up_next']] == ['Ben', 'Chen']
     assert data['stats'] == {'pending': 3, 'served': 0, 'total': 3}
 
