@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% block title %}Manage Queue{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Manage Queue</h1>
+    <p class="muted">Serve coupons in order, or remove ones issued by mistake.</p>
+  </div>
+  <form method="post" action="{{ url_for('create_coupon') }}">
+    <button type="submit" class="btn btn-primary">+ New Coupon</button>
+  </form>
+</div>
+
+<section class="stats">
+  <div class="stat card"><span class="stat-value">{{ stats.pending }}</span><span class="stat-label">Pending</span></div>
+  <div class="stat card"><span class="stat-value">{{ stats.served }}</span><span class="stat-label">Served</span></div>
+  <div class="stat card"><span class="stat-value">{{ stats.total }}</span><span class="stat-label">Total</span></div>
+</section>
+
+<div class="grid-2">
+  <section class="card">
+    <div class="section-head">
+      <h2>Pending</h2>
+      <input type="search" class="search" placeholder="Search coupon…" data-filter="pending-table" aria-label="Search pending coupons">
+    </div>
+    {% if pending %}
+    <div class="table-wrap">
+      <table id="pending-table">
+        <thead><tr><th>#</th><th>Coupon</th><th>Issued</th><th class="right">Actions</th></tr></thead>
+        <tbody>
+          {% for c in pending %}
+          <tr class="{{ 'row-next' if loop.first }}">
+            <td>{{ loop.index }}</td>
+            <td><strong>{{ c.number }}</strong>{% if loop.first %} <span class="badge badge-pending">Next</span>{% endif %}</td>
+            <td class="muted">{{ c.created_at|localtime('%I:%M %p') }}</td>
+            <td class="right">
+              <form method="post" class="inline">
+                <input type="hidden" name="coupon_id" value="{{ c.id }}">
+                <button name="action" value="serve" class="btn btn-sm btn-success">Serve</button>
+                <button name="action" value="delete" class="btn btn-sm btn-danger" data-confirm="Delete coupon {{ c.number }}?">Delete</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+      <p class="empty">No pending coupons. 🎉</p>
+    {% endif %}
+  </section>
+
+  <section class="card">
+    <div class="section-head"><h2>Recently Served</h2></div>
+    {% if served %}
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Coupon</th><th>Issued</th><th class="right">Actions</th></tr></thead>
+        <tbody>
+          {% for c in served %}
+          <tr>
+            <td><strong>{{ c.number }}</strong></td>
+            <td class="muted">{{ c.created_at|localtime('%I:%M %p') }}</td>
+            <td class="right">
+              <form method="post" class="inline">
+                <input type="hidden" name="coupon_id" value="{{ c.id }}">
+                <button name="action" value="requeue" class="btn btn-sm btn-ghost">Undo</button>
+                <button name="action" value="delete" class="btn btn-sm btn-danger" data-confirm="Delete coupon {{ c.number }}?">Delete</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+      <p class="empty">Nothing served yet.</p>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

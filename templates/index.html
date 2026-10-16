@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<section class="hero">
+  <div class="hero-text">
+    <p class="eyebrow">Skip the line</p>
+    <h1>Get your canteen coupon in one tap.</h1>
+    <p class="lead">Generate a token, take a seat, and watch the display board. We'll call your number when your meal is ready.</p>
+    <form method="post" action="{{ url_for('create_coupon') }}">
+      <button type="submit" class="btn btn-primary btn-lg">Generate New Coupon</button>
+    </form>
+  </div>
+  <div class="hero-card card">
+    <p class="card-label">Now Serving</p>
+    <p class="big-number">{{ now_serving.number if now_serving else '—' }}</p>
+    <p class="muted">{% if now_serving %}Please collect your order at the counter.{% else %}The queue is empty right now.{% endif %}</p>
+  </div>
+</section>
+
+<section class="stats">
+  <div class="stat card"><span class="stat-value">{{ stats.pending }}</span><span class="stat-label">Waiting</span></div>
+  <div class="stat card"><span class="stat-value">{{ stats.served }}</span><span class="stat-label">Served</span></div>
+  <div class="stat card"><span class="stat-value">{{ stats.total }}</span><span class="stat-label">Total Issued</span></div>
+</section>
+
+<section class="card latest">
+  <h2>Latest Coupon</h2>
+  {% if last %}
+    <div class="latest-row">
+      <div>
+        <p class="coupon-number">{{ last.number }}</p>
+        <p class="muted">Issued {{ last.created_at|localtime }}</p>
+      </div>
+      <span class="badge badge-{{ last.status }}">{{ last.status|capitalize }}</span>
+      <a class="btn btn-ghost" href="{{ url_for('coupon_detail', coupon_id=last.id) }}">View</a>
+    </div>
+  {% else %}
+    <p class="muted">No coupons have been issued yet. Generate the first one above.</p>
+  {% endif %}
+</section>
+
+<section class="steps">
+  <h2>How it works</h2>
+  <ol class="step-list">
+    <li class="card"><span class="step-num">1</span><h3>Generate</h3><p>Tap the button to receive a unique coupon number.</p></li>
+    <li class="card"><span class="step-num">2</span><h3>Wait</h3><p>Keep an eye on the display board for your number.</p></li>
+    <li class="card"><span class="step-num">3</span><h3>Collect</h3><p>Show your coupon at the counter and enjoy your meal.</p></li>
+  </ol>
+</section>
+{% endblock %}

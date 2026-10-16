@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}Coupon {{ coupon.number }}{% endblock %}
+{% block content %}
+<section class="ticket-wrap">
+  <div class="ticket card" id="ticket">
+    <p class="card-label">Your Coupon</p>
+    <p class="ticket-number">{{ coupon.number }}</p>
+    <span class="badge badge-{{ coupon.status }}">{{ coupon.status|capitalize }}</span>
+    <dl class="ticket-meta">
+      <div><dt>Issued</dt><dd>{{ coupon.created_at|localtime }}</dd></div>
+      {% if coupon.status == 'pending' %}
+      <div><dt>Ahead of you</dt><dd>{{ ahead }} {{ 'person' if ahead == 1 else 'people' }}</dd></div>
+      {% endif %}
+    </dl>
+    <p class="muted">Show this number at the counter when it appears on the display board.</p>
+  </div>
+  <div class="actions no-print">
+    <button class="btn btn-ghost" onclick="window.print()">Print Coupon</button>
+    <form method="post" action="{{ url_for('create_coupon') }}">
+      <button type="submit" class="btn btn-primary">Generate Another</button>
+    </form>
+    <a class="btn btn-ghost" href="{{ url_for('index') }}">Back to Home</a>
+  </div>
+</section>
+{% endblock %}
