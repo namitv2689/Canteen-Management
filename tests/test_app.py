@@ -17,24 +17,61 @@ def client(tmp_path):
 def test_home_page_renders(client):
     resp = client.get('/')
     assert resp.status_code == 200
-    assert b'Generate New Coupon' in resp.data
+    assert b'name="customer_name"' in resp.data
 
 
-def test_create_coupon_assigns_number(client):
-    resp = client.post('/create', follow_redirects=True)
+def create(client, name='Asha'):
+    return client.post('/create', data={'customer_name': name})
+
+
+def test_create_coupon_stores_customer_name(client):
+    resp = client.post('/create', data={'customer_name': '  Ravi   Kumar '},
+                       follow_redirects=True)
     assert resp.status_code == 200
-    assert b'C00001' in resp.data
-    assert Coupon.query.one().number == 'C00001'
+    assert b'Ravi Kumar' in resp.data
+    coupon = Coupon.query.one()
+    assert coupon.number == 'C00001'
+    assert coupon.customer_name == 'Ravi Kumar'
+
+
+def test_create_coupon_requires_name(client):
+    resp = client.post('/create', data={'customer_name': '   '}, follow_redirects=True)
+    assert b'Please enter the customer name' in resp.data
+    assert Coupon.query.count() == 0
+
+    create(client, 'x' * 81)
+    assert Coupon.query.count() == 0
+
+
+def test_name_falls_back_to_number(client):
+    db.session.add(Coupon(number='C00009'))
+    db.session.commit()
+    assert Coupon.query.one().display_name == 'C00009'
+
+
+def test_existing_database_gets_name_column(tmp_path):
+    import sqlite3
+    path = tmp_path / 'old.db'
+    conn = sqlite3.connect(path)
+    conn.execute('CREATE TABLE coupon (id INTEGER PRIMARY KEY, number VARCHAR(32) UNIQUE, '
+                 'status VARCHAR(20), created_at DATETIME)')
+    conn.execute("INSERT INTO coupon VALUES (1, 'C00001', 'served', '2026-08-29 13:00:12')")
+    conn.commit()
+    conn.close()
+
+    app = create_app({'TESTING': True, 'SQLALCHEMY_DATABASE_URI': f'sqlite:///{path}'})
+    with app.app_context():
+        assert db.session.get(Coupon, 1).display_name == 'C00001'
 
 
 def test_serve_requeue_and_delete(client):
-    client.post('/create')
-    client.post('/create')
+    create(client, 'Asha')
+    create(client, 'Ben')
     first, second = Coupon.query.order_by(Coupon.id).all()
 
     resp = client.post('/manage', data={'action': 'serve', 'coupon_id': first.id},
                        follow_redirects=True)
-    assert b'marked as served' in resp.data
+    assert b'Asha marked as served' in resp.data
     assert db.session.get(Coupon, first.id).status == 'served'
 
     client.post('/manage', data={'action': 'requeue', 'coupon_id': first.id})
@@ -51,11 +88,12 @@ def test_manage_handles_missing_coupon(client):
 
 
 def test_api_queue(client):
-    for _ in range(3):
-        client.post('/create')
+    for name in ('Asha', 'Ben', 'Chen'):
+        create(client, name)
     data = client.get('/api/queue').get_json()
+    assert data['now_serving']['display_name'] == 'Asha'
     assert data['now_serving']['number'] == 'C00001'
-    assert [c['number'] for c in data['up_next']] == ['C00002', 'C00003']
+    assert [c['display_name'] for c in data['up_next']] == ['Ben', 'Chen']
     assert data['stats'] == {'pending': 3, 'served': 0, 'total': 3}
 
 

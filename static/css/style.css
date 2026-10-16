@@ -187,3 +187,21 @@ form.inline { display: inline-flex; gap: .4rem; margin: 0; }
   .ticket { box-shadow: none; border: 2px dashed #000; }
   .ticket-number { color: #000; }
 }
+
+/* Customer names */
+.input {
+  padding: .6rem .9rem; border: 1px solid var(--border); border-radius: 10px;
+  background: var(--surface); color: var(--text); font: inherit; min-width: 0;
+}
+.input:focus-visible { outline: 3px solid var(--primary); outline-offset: 1px; border-color: var(--primary); }
+.input-lg { padding: .9rem 1.1rem; font-size: 1.05rem; flex: 1; max-width: 22rem; }
+.name-form { display: flex; gap: .75rem; flex-wrap: wrap; }
+.name-form-inline .input { width: 200px; }
+.name-text, .ticket-name, .board-name { overflow-wrap: anywhere; word-break: break-word; line-height: 1.1; }
+.big-number.name-text { font-size: clamp(2rem, 6vw, 3.25rem); }
+.ticket-name { font-size: clamp(2.25rem, 9vw, 3.5rem); }
+.board-name { font-size: clamp(2.75rem, 9vw, 6rem); }
+.chip-list li { overflow-wrap: anywhere; }
+@media (max-width: 640px) {
+  .name-form .input, .name-form-inline .input, .name-form .btn { width: 100%; max-width: none; flex: 1 1 100%; }
+}

@@ -56,7 +56,7 @@
       }
       items.forEach(function (c) {
         var li = document.createElement('li');
-        li.textContent = c.number;
+        li.textContent = c.display_name;
         el.appendChild(li);
       });
     };
@@ -65,7 +65,7 @@
       fetch(board.getAttribute('data-api'), { cache: 'no-store' })
         .then(function (r) { return r.json(); })
         .then(function (data) {
-          var num = data.now_serving ? data.now_serving.number : '—';
+          var num = data.now_serving ? data.now_serving.display_name : '—';
           if (num !== current) {
             nowEl.textContent = num;
             nowEl.classList.remove('flash-in');

@@ -1,10 +1,11 @@
 # Canteen Coupon Management System
 
-A Flask web application for generating and managing canteen coupons. Customers generate a token in one tap, staff manage the queue, and a live display board shows the number being served.
+A Flask web application for generating and managing canteen coupons. Customers enter their name to get a coupon, staff manage the queue, and a live display board shows the name of the customer being served.
 
 ## Features
 
-- Generate a new coupon with a unique ID-based number such as `C00001`
+- Generate a coupon for a customer by name; each coupon also gets an internal number such as `C00001`
+- Customer names are shown everywhere instead of coupon numbers
 - Printable coupon page showing how many people are ahead in the queue
 - Home page with "Now Serving", queue statistics and the latest coupon
 - Staff queue manager: serve, undo (move back to queue), delete, and search coupons
@@ -98,16 +99,19 @@ python -m pytest
 - The `Coupon` model stores:
   - `id`
   - `number`
+  - `customer_name`
   - `status`
   - `created_at`
-- A new coupon is generated and assigned a number in the format `C00001`.
+- A new coupon stores the customer's name and is assigned a number in the format `C00001`.
+- Coupons created before names were added have no name and fall back to showing their number.
+- Existing `canteen.db` files are upgraded automatically on startup (the `customer_name` column is added).
 - The management page lets staff mark coupons as served, undo a serve, or delete them.
 - The display board polls `/api/queue` every 5 seconds.
 
 ## Routes
 
 - `GET /` - Home page with now serving, stats and the latest coupon
-- `POST /create` - Create a new coupon, then redirect to its page
+- `POST /create` - Create a new coupon (form field `customer_name`), then redirect to its page
 - `GET /coupon/<id>` - View (and print) a coupon
 - `GET /manage` - View pending and served coupons
 - `POST /manage` - Serve, requeue or delete a coupon

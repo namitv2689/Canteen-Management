@@ -6,7 +6,8 @@
     <h1>Manage Queue</h1>
     <p class="muted">Serve coupons in order, or remove ones issued by mistake.</p>
   </div>
-  <form method="post" action="{{ url_for('create_coupon') }}">
+  <form method="post" action="{{ url_for('create_coupon') }}" class="name-form name-form-inline">
+    <input type="text" name="customer_name" class="input" placeholder="Customer name" maxlength="80" required autocomplete="off" aria-label="Customer name">
     <button type="submit" class="btn btn-primary">+ New Coupon</button>
   </form>
 </div>
@@ -21,23 +22,23 @@
   <section class="card">
     <div class="section-head">
       <h2>Pending</h2>
-      <input type="search" class="search" placeholder="Search coupon…" data-filter="pending-table" aria-label="Search pending coupons">
+      <input type="search" class="search" placeholder="Search name…" data-filter="pending-table" aria-label="Search pending coupons">
     </div>
     {% if pending %}
     <div class="table-wrap">
       <table id="pending-table">
-        <thead><tr><th>#</th><th>Coupon</th><th>Issued</th><th class="right">Actions</th></tr></thead>
+        <thead><tr><th>#</th><th>Customer</th><th>Issued</th><th class="right">Actions</th></tr></thead>
         <tbody>
           {% for c in pending %}
           <tr class="{{ 'row-next' if loop.first }}">
             <td>{{ loop.index }}</td>
-            <td><strong>{{ c.number }}</strong>{% if loop.first %} <span class="badge badge-pending">Next</span>{% endif %}</td>
+            <td><strong>{{ c.display_name }}</strong>{% if loop.first %} <span class="badge badge-pending">Next</span>{% endif %}</td>
             <td class="muted">{{ c.created_at|localtime('%I:%M %p') }}</td>
             <td class="right">
               <form method="post" class="inline">
                 <input type="hidden" name="coupon_id" value="{{ c.id }}">
                 <button name="action" value="serve" class="btn btn-sm btn-success">Serve</button>
-                <button name="action" value="delete" class="btn btn-sm btn-danger" data-confirm="Delete coupon {{ c.number }}?">Delete</button>
+                <button name="action" value="delete" class="btn btn-sm btn-danger" data-confirm="Delete the coupon for {{ c.display_name }}?">Delete</button>
               </form>
             </td>
           </tr>
@@ -55,17 +56,17 @@
     {% if served %}
     <div class="table-wrap">
       <table>
-        <thead><tr><th>Coupon</th><th>Issued</th><th class="right">Actions</th></tr></thead>
+        <thead><tr><th>Customer</th><th>Issued</th><th class="right">Actions</th></tr></thead>
         <tbody>
           {% for c in served %}
           <tr>
-            <td><strong>{{ c.number }}</strong></td>
+            <td><strong>{{ c.display_name }}</strong></td>
             <td class="muted">{{ c.created_at|localtime('%I:%M %p') }}</td>
             <td class="right">
               <form method="post" class="inline">
                 <input type="hidden" name="coupon_id" value="{{ c.id }}">
                 <button name="action" value="requeue" class="btn btn-sm btn-ghost">Undo</button>
-                <button name="action" value="delete" class="btn btn-sm btn-danger" data-confirm="Delete coupon {{ c.number }}?">Delete</button>
+                <button name="action" value="delete" class="btn btn-sm btn-danger" data-confirm="Delete the coupon for {{ c.display_name }}?">Delete</button>
               </form>
             </td>
           </tr>

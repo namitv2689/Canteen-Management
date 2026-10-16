@@ -6,6 +6,7 @@ from flask import (
     Flask, abort, flash, jsonify, redirect, render_template, request, url_for,
 )
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import inspect, text
 
 db = SQLAlchemy()
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -18,13 +19,21 @@ def utcnow():
 class Coupon(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     number = db.Column(db.String(32), unique=True, nullable=True)
+    customer_name = db.Column(db.String(80), nullable=True)
     status = db.Column(db.String(20), default='pending')  # 'pending' or 'served'
     created_at = db.Column(db.DateTime, default=utcnow)
+
+    @property
+    def display_name(self):
+        # Coupons created before names were collected fall back to their number.
+        return self.customer_name or self.number
 
     def to_dict(self):
         return {
             'id': self.id,
             'number': self.number,
+            'customer_name': self.customer_name,
+            'display_name': self.display_name,
             'status': self.status,
             'created_at': self.created_at.isoformat() if self.created_at else None,
         }
@@ -37,6 +46,17 @@ def queue_stats():
     pending = Coupon.query.filter_by(status='pending').count()
     served = Coupon.query.filter_by(status='served').count()
     return {'pending': pending, 'served': served, 'total': pending + served}
+
+
+MAX_NAME_LENGTH = 80
+
+
+def upgrade_schema():
+    """Add columns introduced after the first release to existing databases."""
+    columns = {c['name'] for c in inspect(db.engine).get_columns('coupon')}
+    if 'customer_name' not in columns:
+        with db.engine.begin() as conn:
+            conn.execute(text('ALTER TABLE coupon ADD COLUMN customer_name VARCHAR(80)'))
 
 
 def create_app(test_config=None):
@@ -54,6 +74,7 @@ def create_app(test_config=None):
     db.init_app(app)
     with app.app_context():
         db.create_all()
+        upgrade_schema()
 
     @app.context_processor
     def inject_globals():
@@ -75,8 +96,15 @@ def create_app(test_config=None):
 
     @app.route('/create', methods=['POST'])
     def create_coupon():
+        name = ' '.join(request.form.get('customer_name', '').split())
+        if not name:
+            flash('Please enter the customer name.', 'error')
+            return redirect(request.referrer or url_for('index'))
+        if len(name) > MAX_NAME_LENGTH:
+            flash(f'Name must be at most {MAX_NAME_LENGTH} characters.', 'error')
+            return redirect(request.referrer or url_for('index'))
         # Insert a row to get a unique auto-increment id, then derive the number.
-        coupon = Coupon()
+        coupon = Coupon(customer_name=name)
         db.session.add(coupon)
         db.session.flush()
         coupon.number = f"C{coupon.id:05d}"
@@ -103,16 +131,16 @@ def create_app(test_config=None):
             elif action == 'serve' and coupon.status == 'pending':
                 coupon.status = 'served'
                 db.session.commit()
-                flash(f'Coupon {coupon.number} marked as served.', 'success')
+                flash(f'{coupon.display_name} marked as served.', 'success')
             elif action == 'requeue' and coupon.status == 'served':
                 coupon.status = 'pending'
                 db.session.commit()
-                flash(f'Coupon {coupon.number} moved back to the queue.', 'info')
+                flash(f'{coupon.display_name} moved back to the queue.', 'info')
             elif action == 'delete':
-                number = coupon.number
+                name = coupon.display_name
                 db.session.delete(coupon)
                 db.session.commit()
-                flash(f'Coupon {number} deleted.', 'info')
+                flash(f'Coupon for {name} deleted.', 'info')
             else:
                 flash('That action could not be completed.', 'error')
             return redirect(url_for('manage'))
