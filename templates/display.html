@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}Display Board{% endblock %}
+{% block body_class %}display-page{% endblock %}
+{% block content %}
+<section class="board" data-board data-api="{{ url_for('api_queue') }}">
+  <div class="board-main card">
+    <p class="card-label">Now Serving</p>
+    <p class="board-number board-name" data-now>—</p>
+    <p class="coupon-tag coupon-tag-xl" data-now-number hidden></p>
+    <p class="muted" data-updated>Loading…</p>
+  </div>
+  <div class="board-side">
+    <div class="card">
+      <h2>Up Next</h2>
+      <ul class="chip-list" data-next><li class="muted">—</li></ul>
+    </div>
+    <div class="card">
+      <h2>Recently Served</h2>
+      <ul class="chip-list chip-list-muted" data-served><li class="muted">—</li></ul>
+    </div>
+  </div>
+</section>
+{% endblock %}

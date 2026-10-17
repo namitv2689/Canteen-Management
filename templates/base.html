@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Canteen Coupons{% endblock %} · Canteen Coupons</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="{% block body_class %}{% endblock %}">
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="{{ url_for('index') }}">
+        <span class="brand-mark" aria-hidden="true">🍽</span>
+        <span>Canteen<strong>Coupons</strong></span>
+      </a>
+      <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" data-nav-toggle>☰</button>
+      <nav class="nav" data-nav>
+        {% set ep = request.endpoint %}
+        <a href="{{ url_for('index') }}" class="{{ 'active' if ep == 'index' }}">Home</a>
+        <a href="{{ url_for('manage') }}" class="{{ 'active' if ep == 'manage' }}">Manage Queue</a>
+        <a href="{{ url_for('display') }}" class="{{ 'active' if ep == 'display' }}">Display Board</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container main">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flashes">
+          {% for category, message in messages %}
+            <div class="flash flash-{{ category }}" role="status">
+              <span>{{ message }}</span>
+              <button class="flash-close" aria-label="Dismiss" data-dismiss>&times;</button>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">© {{ current_year }} Canteen Coupon Management System</div>
+  </footer>
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

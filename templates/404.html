@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}Not Found{% endblock %}
+{% block content %}
+<section class="card center-card">
+  <p class="big-number">404</p>
+  <h1>Page not found</h1>
+  <p class="muted">The coupon or page you were looking for doesn't exist.</p>
+  <a class="btn btn-primary" href="{{ url_for('index') }}">Go Home</a>
+</section>
+{% endblock %}

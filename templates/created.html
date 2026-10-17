@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}Coupon {{ coupon.label }}{% endblock %}
+{% block content %}
+<section class="ticket-wrap">
+  <div class="ticket card" id="ticket">
+    <p class="card-label">Your Coupon</p>
+    <p class="ticket-number ticket-name">{{ coupon.display_name }}</p>
+    {% if coupon.customer_name %}<p class="coupon-tag coupon-tag-lg">Coupon No. {{ coupon.number }}</p>{% endif %}
+    <span class="badge badge-{{ coupon.status }}">{{ coupon.status|capitalize }}</span>
+    <dl class="ticket-meta">
+      <div><dt>Issued</dt><dd>{{ coupon.created_at|localtime }}</dd></div>
+      {% if coupon.status == 'pending' %}
+      <div><dt>Ahead of you</dt><dd>{{ ahead }} {{ 'person' if ahead == 1 else 'people' }}</dd></div>
+      {% endif %}
+    </dl>
+    <p class="muted">Collect your order at the counter when your name and coupon number appear on the display board.</p>
+  </div>
+  <div class="actions no-print">
+    <button class="btn btn-ghost" onclick="window.print()">Print Coupon</button>
+    <form method="post" action="{{ url_for('create_coupon') }}" class="name-form name-form-inline">
+      <input type="text" name="customer_name" class="input" placeholder="Customer name" maxlength="80" required autocomplete="off" aria-label="Customer name">
+      <button type="submit" class="btn btn-primary">Generate Another</button>
+    </form>
+    <a class="btn btn-ghost" href="{{ url_for('index') }}">Back to Home</a>
+  </div>
+</section>
+{% endblock %}
